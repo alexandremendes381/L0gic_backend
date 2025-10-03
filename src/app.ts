@@ -7,9 +7,69 @@ import { database } from './config/database';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Configuração CORS otimizada para Vercel
+const corsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Permitir requisições sem origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Lista de origens permitidas
+    const allowedOrigins = [
+      // Desenvolvimento local
+      'http://localhost:3000',
+      'http://localhost:3001', 
+      'http://localhost:5173',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:5173',
+      'https://localhost:3000',
+      'https://localhost:5173',
+      // Vercel domains
+      /^https:\/\/.*\.vercel\.app$/,
+      /^https:\/\/l0gic-backend.*\.vercel\.app$/,
+      process.env.FRONTEND_URL, // URL do frontend se definida
+    ].filter(Boolean);
+    
+    // Em desenvolvimento, permitir qualquer origem
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+    
+    // Verificar se a origem está permitida
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      if (typeof allowedOrigin === 'string') {
+        return allowedOrigin === origin;
+      }
+      if (allowedOrigin instanceof RegExp) {
+        return allowedOrigin.test(origin);
+      }
+      return false;
+    });
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('Não permitido pelo CORS'), false);
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With', 
+    'Content-Type',
+    'Accept',
+    'Authorization',
+    'Cache-Control',
+    'Pragma',
+    'X-Custom-Header'
+  ]
+};
+
+app.use(cors(corsOptions));
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use('/api', routes);
 

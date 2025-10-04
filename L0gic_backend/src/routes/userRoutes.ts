@@ -5,6 +5,7 @@ const router = Router();
 const userController = new UserController();
 
 router.post('/', userController.createUser);
+router.get('/search', userController.searchUsers);
 router.get('/', userController.getAllUsers);
 router.get('/:id', userController.getUserById);
 router.put('/:id', userController.updateUser);

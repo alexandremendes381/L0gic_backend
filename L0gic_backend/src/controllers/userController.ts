@@ -274,4 +274,71 @@ export class UserController {
       }
     }
   };
+
+  /**
+   * @swagger
+   * /api/users/search:
+   *   get:
+   *     summary: Buscar usuários por email ou nome
+   *     tags: [Users]
+   *     parameters:
+   *       - in: query
+   *         name: q
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: Termo de busca para filtrar por email ou nome
+   *         example: "joão"
+   *     responses:
+   *       200:
+   *         description: Lista de usuários encontrados
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 type: object
+   *                 properties:
+   *                   id:
+   *                     type: integer
+   *                   name:
+   *                     type: string
+   *                   email:
+   *                     type: string
+   *                   phone:
+   *                     type: string
+   *                   position:
+   *                     type: string
+   *                   birthDate:
+   *                     type: string
+   *                   message:
+   *                     type: string
+   *                   createdAt:
+   *                     type: string
+   *                   updatedAt:
+   *                     type: string
+   *       400:
+   *         description: Termo de busca é obrigatório
+   *       500:
+   *         description: Erro interno do servidor
+   */
+  searchUsers = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const searchTerm = req.query.q as string;
+      
+      if (!searchTerm) {
+        res.status(400).json({ error: 'Parâmetro de busca "q" é obrigatório' });
+        return;
+      }
+
+      const users = await this.userService.searchUsers(searchTerm);
+      res.status(200).json(users);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Erro interno do servidor' });
+      }
+    }
+  };
 }

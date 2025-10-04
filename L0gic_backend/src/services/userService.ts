@@ -73,4 +73,12 @@ export class UserService {
       throw new Error('Usuário não encontrado');
     }
   }
+
+  async searchUsers(searchTerm: string): Promise<User[]> {
+    if (!searchTerm || searchTerm.trim().length === 0) {
+      throw new Error('Termo de busca é obrigatório');
+    }
+    
+    return await this.userRepository.searchUsersByEmailAndName(searchTerm.trim());
+  }
 }

@@ -47,4 +47,13 @@ export class UserRepository {
       where: { email },
     });
   }
+
+  async searchUsersByEmailAndName(searchTerm: string): Promise<User[]> {
+    return await this.repository
+      .createQueryBuilder('user')
+      .where('user.email LIKE :searchTerm', { searchTerm: `%${searchTerm}%` })
+      .orWhere('user.name LIKE :searchTerm', { searchTerm: `%${searchTerm}%` })
+      .orderBy('user.createdAt', 'DESC')
+      .getMany();
+  }
 }
